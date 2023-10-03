@@ -1,0 +1,85 @@
+version: '3.3'
+
+services: 
+  postgres: # Banco de dados
+    image: postgres:15
+    hostname: db
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=rinha
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: '1.8GB'
+  
+  backend_gg1: 
+    container_name: backend_2
+    build: .
+    hostname: backend_gg2
+    depends_on:
+      - postgres
+    expose:
+      - "80"
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '0.5GB'
+
+  backend_gg2:
+    container_name: backend_gg1
+    build: .
+    hostname: backend_gg1
+    depends_on:
+      - postgres
+    expose:
+      - "80"
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '0.5GB'
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend_gg1
+      - backend_gg2
+    ports:
+      - "9999:80"
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: '0.2GB'
+
+  redis:
+    image: docker.io/redis:latest
+    hostname: redis
+    command: redis-server --save "" --appendonly no --maxclients 20000
+    network_mode: host
+    deploy:
+      resources:
+        limits:
+          cpus: '0.05'
+          memory: '0.1GB'
+
+networks:
+  default:
+    driver: bridge
+    name: backend_gg
+
+
+        
