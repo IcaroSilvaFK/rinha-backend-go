@@ -9,6 +9,7 @@ type PersonServiceInterface interface {
 	Create(nome, apelido, nascimento, stack string) (string, error)
 	FindPersonById(id string) (*models.PersonModel, error)
 	FindPersonBySearchTerm(term string) (*[]models.PersonModel, error)
+	CountPersons() (int, error)
 }
 
 func NewPersonService() PersonServiceInterface {
@@ -36,4 +37,12 @@ func (*PersonServiceStruct) FindPersonBySearchTerm(term string) (*[]models.Perso
 	p, err := models.FindBySearchTerm(term)
 
 	return p, err
+}
+
+func (*PersonServiceStruct) CountPersons() (int, error) {
+
+	r, err := models.CountPersons()
+
+	return r, err
+
 }

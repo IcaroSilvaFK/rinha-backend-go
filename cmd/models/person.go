@@ -109,3 +109,14 @@ func FindBySearchTerm(term string) (*[]PersonModel, error) {
 
 	return &p, nil
 }
+
+func CountPersons() (int, error) {
+
+	sqlDB := database.NewDatabaseConnection()
+
+	var count int
+
+	sqlDB.QueryRow("SELECT COUNT(id) FROM pessoas").Scan(&count)
+
+	return count, nil
+}

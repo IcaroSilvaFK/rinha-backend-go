@@ -20,5 +20,5 @@ func InitializeRoutes(r *chi.Mux) {
 	r.Post("/person", personController.Create)
 	r.Get("/person", personController.FindPersonBySearchTerm)
 	r.Get("/person/{id}", personController.FindPersonById)
-
+	r.Get("/count", personController.CountPersons)
 }
