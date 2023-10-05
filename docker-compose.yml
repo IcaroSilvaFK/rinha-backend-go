@@ -1,6 +1,6 @@
-version: '3.3'
+version: "3.3"
 
-services: 
+services:
   postgres: # Banco de dados
     image: postgres:15
     hostname: db
@@ -16,38 +16,38 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.4'
-          memory: '1.8GB'
-  
-  backend_gg1: 
-    container_name: backend_2
-    build: .
-    hostname: backend_gg2
-    depends_on:
-      - postgres
-    expose:
-      - "80"
-    restart: on-failure
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: '0.5GB'
+          cpus: "0.4"
+          memory: "1.8GB"
 
-  backend_gg2:
+  backend_gg1:
     container_name: backend_gg1
     build: .
     hostname: backend_gg1
     depends_on:
       - postgres
     expose:
-      - "80"
+      - "8080:8080"
     restart: on-failure
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: '0.5GB'
+          cpus: "0.5"
+          memory: "0.5GB"
+
+  backend_gg2:
+    container_name: backend_gg2
+    build: .
+    hostname: backend_gg1
+    depends_on:
+      - postgres
+    expose:
+      - "8080:8080"
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "0.5GB"
 
   nginx:
     image: nginx:latest
@@ -57,13 +57,13 @@ services:
       - backend_gg1
       - backend_gg2
     ports:
-      - "9999:80"
+      - "9999:9999"
     restart: on-failure
     deploy:
       resources:
         limits:
-          cpus: '0.1'
-          memory: '0.2GB'
+          cpus: "0.1"
+          memory: "0.2GB"
 
   redis:
     image: docker.io/redis:latest
@@ -73,13 +73,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.05'
-          memory: '0.1GB'
+          cpus: "0.05"
+          memory: "0.1GB"
 
 networks:
   default:
     driver: bridge
     name: backend_gg
-
-
-        
