@@ -1,8 +1,13 @@
 package services
 
-import "github.com/IcaroSilvaFK/rinha-go/cmd/models"
+import (
+	"errors"
+
+	"github.com/IcaroSilvaFK/rinha-go/cmd/models"
+)
 
 type PersonServiceStruct struct {
+	model models.PersonModelInterface
 }
 
 type PersonServiceInterface interface {
@@ -12,36 +17,40 @@ type PersonServiceInterface interface {
 	CountPersons() (int, error)
 }
 
-func NewPersonService() PersonServiceInterface {
-	return &PersonServiceStruct{}
+func NewPersonService(
+	model models.PersonModelInterface,
+) PersonServiceInterface {
+	return &PersonServiceStruct{
+		model,
+	}
 }
 
-func (*PersonServiceStruct) Create(nome, apelido, nascimento, stack string) (string, error) {
+func (ps *PersonServiceStruct) Create(nome, apelido, nascimento, stack string) (string, error) {
 
-	personId, err := models.CreatePerson(nome, apelido, nascimento, stack)
+	personId, err := ps.model.CreatePerson(nome, apelido, nascimento, stack)
 
-	if err != nil {
+	if !errors.Is(err, nil) {
 		return "", err
 	}
 
 	return personId, nil
 }
 
-func (*PersonServiceStruct) FindPersonById(id string) (*models.PersonModel, error) {
-	p, err := models.FindPersonById(id)
+func (ps *PersonServiceStruct) FindPersonById(id string) (*models.PersonModel, error) {
+	p, err := ps.model.FindPersonById(id)
 
 	return p, err
 }
 
-func (*PersonServiceStruct) FindPersonBySearchTerm(term string) (*[]models.PersonModel, error) {
-	p, err := models.FindBySearchTerm(term)
+func (ps *PersonServiceStruct) FindPersonBySearchTerm(term string) (*[]models.PersonModel, error) {
+	p, err := ps.model.FindBySearchTerm(term)
 
 	return p, err
 }
 
-func (*PersonServiceStruct) CountPersons() (int, error) {
+func (ps *PersonServiceStruct) CountPersons() (int, error) {
 
-	r, err := models.CountPersons()
+	r, err := ps.model.CountPersons()
 
 	return r, err
 

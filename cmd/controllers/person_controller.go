@@ -63,7 +63,7 @@ func (ct *personController) FindPersonById(w http.ResponseWriter, r *http.Reques
 
 	p, err := ct.svc.FindPersonById(id)
 
-	if err != nil {
+	if !errors.Is(err, nil) {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -84,7 +84,7 @@ func (ct *personController) FindPersonBySearchTerm(w http.ResponseWriter, r *htt
 
 	p, err := ct.svc.FindPersonBySearchTerm(term)
 
-	if err != nil {
+	if !errors.Is(err, nil) {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -99,13 +99,13 @@ func (ct *personController) CountPersons(w http.ResponseWriter, r *http.Request)
 
 	v, err := ct.svc.CountPersons()
 
-	if err != nil {
+	if !errors.Is(err, nil) {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("%d", v)))
+	w.Write([]byte(fmt.Sprintf("/person/%d", v)))
 
 }

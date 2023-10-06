@@ -13,7 +13,7 @@ func main() {
 
 	mux := chi.NewRouter()
 
-	mux.Use(middleware.Logger)
+	mux.Use(middleware.Recoverer)
 
 	router.InitializeRoutes(mux)
 	log.Fatal(http.ListenAndServe(":8080", mux))

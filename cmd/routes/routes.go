@@ -4,16 +4,20 @@ import (
 	"net/http"
 
 	"github.com/IcaroSilvaFK/rinha-go/cmd/controllers"
+	"github.com/IcaroSilvaFK/rinha-go/cmd/database"
+	"github.com/IcaroSilvaFK/rinha-go/cmd/models"
 	"github.com/IcaroSilvaFK/rinha-go/cmd/services"
 	"github.com/go-chi/chi/v5"
 )
 
 func InitializeRoutes(r *chi.Mux) {
 
-	personService := services.NewPersonService()
+	db := database.NewDatabaseConnection()
+	personModel := models.NewPersonModel(db)
+	personService := services.NewPersonService(personModel)
 	personController := controllers.NewPersonController(personService)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
 

@@ -1,9 +1,9 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 
-	"github.com/IcaroSilvaFK/rinha-go/cmd/database"
 	"github.com/IcaroSilvaFK/rinha-go/cmd/utils"
 )
 
@@ -15,7 +15,26 @@ type PersonModel struct {
 	Stack      string `json:"stack"`
 }
 
-func CreatePerson(nome, apelido, nascimento, stack string) (string, error) {
+type PersonModelInstance struct {
+	db *sql.DB
+}
+
+type PersonModelInterface interface {
+	CreatePerson(nome, apelido, nascimento, stack string) (string, error)
+	FindPersonById(id string) (*PersonModel, error)
+	FindBySearchTerm(term string) (*[]PersonModel, error)
+	CountPersons() (int, error)
+}
+
+func NewPersonModel(
+	conn *sql.DB,
+) PersonModelInterface {
+	return &PersonModelInstance{
+		db:conn,
+	}
+}
+
+func (pmi *PersonModelInstance) CreatePerson(nome, apelido, nascimento, stack string) (string, error) {
 
 	personId := utils.NewUUID()
 
@@ -27,9 +46,8 @@ func CreatePerson(nome, apelido, nascimento, stack string) (string, error) {
 		Stack:      stack,
 	}
 
-	sqlDB := database.NewDatabaseConnection()
 
-	stmt, err := sqlDB.Prepare("INSERT INTO pessoas (id, nome, apelido, nascimento, stack) VALUES ($1, $2, $3, $4, $5)")
+	stmt, err := pmi.db.Prepare("INSERT INTO pessoas (id, nome, apelido, nascimento, stack) VALUES ($1, $2, $3, $4, $5)")
 
 	if !errors.Is(err, nil) {
 		return "", err
@@ -46,11 +64,10 @@ func CreatePerson(nome, apelido, nascimento, stack string) (string, error) {
 	return p.Id, nil
 }
 
-func FindPersonById(id string) (*PersonModel, error) {
+func (pmi *PersonModelInstance)  FindPersonById(id string) (*PersonModel, error) {
 
-	sqlDB := database.NewDatabaseConnection()
 
-	stmt, err := sqlDB.Prepare("SELECT apelido,nome,nascimento,stack FROM pessoas WHERE id = $1")
+	stmt, err := pmi.db.Prepare("SELECT apelido,nome,nascimento,stack FROM pessoas WHERE id = $1")
 
 	if !errors.Is(err, nil) {
 		return nil, err
@@ -79,11 +96,10 @@ func FindPersonById(id string) (*PersonModel, error) {
 	return &p, nil
 }
 
-func FindBySearchTerm(term string) (*[]PersonModel, error) {
+func (pmi *PersonModelInstance)  FindBySearchTerm(term string) (*[]PersonModel, error) {
 
-	sqlDB := database.NewDatabaseConnection()
 
-	stmt, err := sqlDB.Prepare("SELECT apelido,nome,nascimento,stack FROM pessoas WHERE busca ilike '%' || $1 || '%' limit 50")
+	stmt, err := pmi.db.Prepare("SELECT apelido,nome,nascimento,stack FROM pessoas WHERE busca ilike '%' || $1 || '%' limit 50")
 
 	if !errors.Is(err, nil) {
 		return nil, err
@@ -110,13 +126,12 @@ func FindBySearchTerm(term string) (*[]PersonModel, error) {
 	return &p, nil
 }
 
-func CountPersons() (int, error) {
+func (pmi *PersonModelInstance)  CountPersons() (int, error) {
 
-	sqlDB := database.NewDatabaseConnection()
 
 	var count int
 
-	sqlDB.QueryRow("SELECT COUNT(id) FROM pessoas").Scan(&count)
+	pmi.db.QueryRow("SELECT COUNT(id) FROM pessoas").Scan(&count)
 
 	return count, nil
 }
